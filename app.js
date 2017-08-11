@@ -7,13 +7,15 @@ new Vue({
         playerHealth: 100,
         monsterHealth: 100,
         gameIsRunning: false,
-        
+        turns: []
     },
     methods: {
+        // ALL ACTION BUTTONS
         startGame: function() {
             this.gameIsRunning = true;
             this.playerHealth = 100;
             this.monsterHealth = 100;
+            this.turns = [];
         },
 
         attack: function() {
@@ -21,7 +23,13 @@ new Vue({
             // var max = 10;
             // var min = 3;
             // var damage = Math.max(Math.floor(Math.random() * max) + 1, min);
-            this.monsterHealth -= this.calculateDamage(3, 10);
+            var damage = this.calculateDamage(3, 10);
+            this.monsterHealth -= damage;
+            // ATTACKS TURN LOG
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'Player hits Monster for ' +damage
+            });
             // if(this.monsterHealth <= 0) {
             //     alert("YOU WON!");
             //     this.gameIsRunning = false;
@@ -44,15 +52,45 @@ new Vue({
         },
 
         specialAttack: function() {
-
+            // can refactor this like monsterAttacks...
+            var damage = this.calculateDamage(7, 15);
+            this.monsterHealth -= damage;
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'Player hits Monster hard for ' +damage
+            });
+            if(this.checkWin()) {
+                return;
+            }
+            // monster damage
+            this.monsterAttacks();
         },
 
         heal: function() {
-
+            if(this.playerHealth <= 90) {
+            this.playerHealth += 10;
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'Player heals for 10'
+            });
+            } else {
+                this.playerHealth = 100;
+            }
+            this.monsterAttacks();
         },
 
         giveUp: function() {
-
+            this.gameIsRunning = false;
+        },
+        // refactored monster damage
+        monsterAttacks: function() {
+            var damage = this.calculateDamage(5, 12);
+            this.playerHealth -= damage;
+            this.checkWin();
+            this.turns.unshift({
+                isPlayer: false,
+                text: 'Monster hits Player for ' +damage
+            });
         },
 
         calculateDamage: function(min, max) {
